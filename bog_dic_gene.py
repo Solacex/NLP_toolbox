@@ -9,14 +9,23 @@ for k in w.keys():
     count+=1
     sen_s=[]
     for s in sen_list:
-        tmp = s.split()
-        for kk in emp:
+        s.replace(',','').replace('.','').replace('?','')
+        tmp = s.split(' ')
+        for kk in tmp:
             re[kk] = re.get(kk,0) +1
 
-    if count%5==0:
+    if count%500==0:
         print(count)
 
 print(len(re))
+rmlist=[]
+for k in re.keys():
+    if re[k]<5:
+        rmlist.append(k)
+        print(k)
+print(len(rmlist))
+for rm in rmlist:
+    re.pop(rm)
 with open('./bog_dic.pkl','wb') as m:
-    pickle.dump(re)
+    pickle.dump(re,m)
 m.close()

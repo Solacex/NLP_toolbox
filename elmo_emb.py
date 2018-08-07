@@ -1,3 +1,11 @@
+
+import math
+import multiprocessing as mtp
+import time
+import logging
+import shutil
+import os.path
+import numpy as np
 import pickle
 from allennlp.data.dataset import Batch
 from allennlp.modules.elmo import Elmo, batch_to_ids
@@ -7,7 +15,6 @@ from allennlp.data.fields import TextField
 import torch
 options_file = "../data/elmo_option.json"
 weight_file  = '../data/elmo_weights.hdf5'
-elmo=Elmo(options_file,weight_file,1,dropout=0)
 
 def elmo(ll):
     for k in ll:
@@ -16,7 +23,7 @@ def elmo(ll):
         sen_s=[]
         for s in sen_list:
             sen_s.append(s.split())
-    
+        elmo=Elmo(options_filw,weight_file,1) 
         instances=[]
         indexer=ELMoTokenCharactersIndexer()
         for sen in sen_s:
@@ -30,7 +37,7 @@ def elmo(ll):
 
         dic={'elmo':{'num_tokens':15}}
         character_ids=dataset.as_tensor_dict(dic)['elmo']['character_ids']
-        character_ids=character_ids.cuda()
+        character_ids=character_ids
         sth = elmo(character_ids)['elmo_representations']
         sth = list(torch.chunk(result,result.shape[0],0))
         re[k] = sth
@@ -42,10 +49,10 @@ def multiCombine(dicc_list):
     tasks = []
     total = len(dicc_list)
     proc_count = mtp.cpu_count()-10
-    block = int(math.ceil(keys*1.0/proc_count))
+    block = int(math.ceil(total*1.0/proc_count))
     box = []
-    print ' - Process:',proc_count
-    print ' - Block size:',block
+    print( ' - Process:',proc_count)
+    print(' - Block size:',block)
     for i in range(proc_count):
         left = int(i*block)
         if (i+1)*block > total:
@@ -57,7 +64,7 @@ def multiCombine(dicc_list):
     count = mtp.Value('i', 0)
     lock = mtp.Lock()
 
-    print 'elmo generation start'
+    print('elmo generation start')
     duration = time.time()
     for i in range(proc_count):
         proc = mtp.Process(target=tgtFunc, args=(box[i]))
@@ -68,13 +75,15 @@ def multiCombine(dicc_list):
         proc.join()
 
     duration = time.time() - duration
-    print 'Combining duration:', int(duration), 's'
+    print('Combining duration:', int(duration), 's')
 
-with open('./data/msrvtt_captions.pkl','rb') as f:
+with open('../data/msrvtt_captions.pkl','rb') as f:
     w=pickle.load(f)
 re={}
-kk = [k in w.keys()]
+kk = [k for k in w.keys()]
 multiCombine(kk)
+with open('msrvtt_elmo_captions_MUl.pkl','wb') as m:
+    pickle.dump(re)
 '''
 count=0
 for k in w.keys():
