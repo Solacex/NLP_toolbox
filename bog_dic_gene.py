@@ -1,6 +1,6 @@
 import pickle
 
-with open('./data/msrvtt_captions.pkl','rb') as f:
+with open('../data/msrvtt_captions.pkl','rb') as f:
     w=pickle.load(f)
 re={}
 count=0
