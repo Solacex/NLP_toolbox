@@ -1,6 +1,6 @@
 import pickle
 
-with open('../data/msrvtt_captions.pkl','rb') as f:
+with open('../data/tv17_captions_test.pkl','rb') as f:
     w=pickle.load(f)
 re={}
 count=0
@@ -26,6 +26,6 @@ for k in re.keys():
 print(len(rmlist))
 for rm in rmlist:
     re.pop(rm)
-with open('./bog_dic.pkl','wb') as m:
+with open('./tv17_bog_dic.pkl','wb') as m:
     pickle.dump(re,m)
 m.close()

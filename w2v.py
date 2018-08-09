@@ -3,7 +3,8 @@ import array
 import os
 import numpy as np
 import sys
-file_dir='/mnt/4TBHDD/yanbin/Miao/data/VisualSearch/word2vec/flickr/vec500flickr30m'
+import pickle
+file_dir='/projects/D2DCRC/lg/guangrui/word2vec/flickr/vec500flickr30m'
 
 def clean_str(string):
     string = re.sub(r"[^A-Za-z0-9]", " ", string)
@@ -15,6 +16,7 @@ class BigFile:
         self.nr_of_images, self.ndims = map(int, open(os.path.join(datadir,'shape.txt')).readline().split())
         id_file = os.path.join(datadir, "id.txt")
         self.names = open(id_file).read().strip().split()
+        print(len(self.names),self.nr_of_images)
         assert(len(self.names) == self.nr_of_images)
         self.name2index = dict(zip(self.names, range(self.nr_of_images)))
         self.binary_file = os.path.join(datadir, "feature.bin")
@@ -121,28 +123,34 @@ class AveWord2Vec(Text2Vec):
 
         if len(renamed) != len(words):
             vectors = []
-            dic={}
+        #    dic={}
             for word in words:
                 if word in renamed2vec:
                     vectors.append(renamed2vec[word])
-                    dic[word]=renamed2vec[word]
+             #       dic[word]=renamed2vec[word]
 
         if len(vectors)>0:
-#            vec = np.array(vectors).mean(axis=0)
+            vec = np.array(vectors).mean(axis=0)
             vec=np.array(vectors)
             if self.L1_normalize:
                 return self.do_L1_norm(vec)
             if self.L2_normalize:
                 return self.do_L2_norm(vec)
-            return vec,dic
+            return vec#,dic
         else:
             return None
 
 w2v_encoder=AveWord2Vec(file_dir)
-
-sent='I am lilei, and you are Hanmeimei. A dog is watching a men! please help'
-vec,dic = w2v_encoder.mapping(sent)
-print(type(vec))
-print(vec.shape)
-print(dic.keys())
-
+with open('../data/tv17_captions_test.pkl','rb') as f:
+    ori = pickle.load(f)
+result={}
+for k  in ori.keys():
+    tmp_list=ori[k]
+    for sen in tmp_list:
+        if k in result:
+            result[k].append(w2v_encoder.mapping(sen))
+        else:
+            result[k]=[w2v_encoder.mapping(sen)]
+    np.save('../data/w2v/'+k+'.npy',result[k])
+#with open('msrvtt_word2vec.pkl','wb') as f:
+#    pickle.dump(result,f)

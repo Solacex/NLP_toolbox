@@ -5,8 +5,8 @@ from allennlp.data.token_indexers.elmo_indexer import ELMoCharacterMapper, ELMoT
 from allennlp.data import Token,Vocabulary,Instance
 from allennlp.data.fields import TextField
 import torch
-options_file = "./elmo/models/elmo_option.json"
-weight_file = './elmo/models/elmo_weights.hdf5'
+options_file = "./data/elmo_option.json"
+weight_file = './data/elmo_weights.hdf5'
 def elmo(sentences):
     elmo=Elmo(options_file,weight_file,1,dropout=0)
     instances=[]
@@ -30,6 +30,9 @@ with open('./data/msrvtt_captions.pkl','rb') as f:
 re={}
 count=0
 for k in w.keys():
+#    if count<500:
+ #       count+=1
+  #      continue
     sen_list=w[k]
     count+=1
     sen_s=[]
@@ -41,7 +44,11 @@ for k in w.keys():
     result = elmo_pre[0].data
     result = list(torch.chunk(result,result.shape[0],0))
     re[k] = result
+    print(result[-1][:,14,:])
+    break
+   # if count ==2000:
+    #    break
 
-with open('./data/elmo_msrvtt_captions.pkl','wb') as m:
-    pickle.dump(re)
+with open('./data/elmo_msrvtt_captions500-2000.pkl','wb') as m:
+    pickle.dump(re,m)
 m.close()

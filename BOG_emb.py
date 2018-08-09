@@ -1,9 +1,9 @@
 from sklearn.externals import joblib
 import numpy as np
 import pickle
-with open('./bog_dic.pkl','rb') as m:
+with open('./tv17_bog_dic.pkl','rb') as m:
     bog = pickle.load(m)
-with open('../data/msrvtt_captions.pkl','rb') as f:
+with open('../data/tv17_captions_test.pkl','rb') as f:
     w = pickle.load(f)
 
 
@@ -24,9 +24,9 @@ for k in w.keys():
         tmp_word = s.split()
         for word in tmp_word:
             tmp[i,np.argwhere(keys==word)]+=1
-    repre[k] = tmp
+    np.save('../data/bog/'+k+'.npy',tmp)
     if count%500==0:
         print(count)
 
 print(len(repre))
-joblib.dump(repre,'bog_msrvtt_caption.pkl')
+#joblib.dump(repre,'bog_msrvtt_caption.pkl')
